@@ -1,10 +1,29 @@
-{% extends 'base.html'%}
-{%block content%}
-<form>
-    <div class="form-group">
-      <label for="exampleInputEmail1">nombre pelicula </label>
-      <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="A" placeholder="Agregar pelicula">
+{% extends "index.html" %}
+
+{% block menu %}
+    {% include "menu.html" %}
+{% endblock %}
+
+{% block content %}
+    <script src="../static/js/app.js"></script>
+
+    <div class="container mt-5"> 
+        <form id="agregarGenero">
+            <h3>Agregar Genero</h3>
+            <div class="mb-3">
+                <label class="form-label">Nombre:</label>
+                <input type="text" class="form-control" name="txtGenero" id="txtGenero" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="agregarGenero()">
+                Guardar
+            </button>
+            <a href="/generosVista">
+                <button type="button" class="btn btn-danger">Cancelar</button>
+            </a>
+        </form>
     </div>
-    
-    <button type ="button" class="btn btn-primary ">agregar </button>
-{%endblock%}
+{% endblock %}
+
+{% block piePagina %}
+    {% include "piePagina.html" %}
+{% endblock %}

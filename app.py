@@ -1,30 +1,60 @@
-from flask import Flask, session, request, redirect
+from flask import Flask, render_template, session, jsonify, flash
 from flask_mongoengine import MongoEngine
+from functools import wraps
+from dotenv import load_dotenv
+from google_recaptcha_flask import ReCaptcha
+from flask_cors import CORS
+from mongoengine.connection import get_db
 import os
 
-app = Flask(__name__)  
-app.config["UPLOAD_FOLDER"] = "./static/img"
-app.config["MONGODB_SETTINGS"] = [{
+load_dotenv()
+
+app = Flask(__name__) 
+CORS(app, resources={r"/*": {"origins": "*"}})  # Permitir cualquier ruta
+
+# Variables de entorno
+key = os.environ.get("SECRET_KEY")
+user = os.environ.get("USER_BD")
+uri = ""  
+
+# Configuración base
+app.secret_key = key  
+app.config['SESSION_TYPE'] = 'filesystem' 
+app.config["UPLOAD_FOLDER"] = "./static/images"
+
+app.config['MONGODB_SETTINGS'] = [{
     "db": "GestionPeliculas",
-    "host": "localhost",
-    "port": 27017
+    "host": uri,
+
 }]
-app.secret_key = "clave_secreta_para_sesiones"  # Clave para sesiones
 
+app.config['CORS_HEADERS'] = 'Content-Type'
+
+#Configurar reCAPTCHA desde variables .env
+app.config['GOOGLE_RECAPTCHA_ENABLED'] = True
+app.config['GOOGLE_RECAPTCHA_SITE_KEY'] = os.environ.get("RECAPTCHA_SITE_KEY")
+app.config['GOOGLE_RECAPTCHA_SECRET_KEY'] = os.environ.get("RECAPTCHA_SECRET_KEY")
+
+# Inicializacion extensiones
+recaptcha = ReCaptcha(app=app)
 db = MongoEngine(app)
+db_actual = get_db()
 
-# Middleware para verificar sesión en todas las rutas
-@app.before_request
-def check_session():
-    # Rutas exentas de verificación de sesión
-    exempt_routes = ['login', 'static']
-    
-    if request.endpoint not in exempt_routes and 'usuario' not in session:
-        if request.path != '/login/':
-            return redirect('/login/')
+print("Coneccion exitosa a la base datos:", db_actual.name)
 
-if __name__ == "__main__":
-    from routers.genero import * 
-    from routers.pelicula import *
-    from routers.usuario import * # Importar las rutas de usuario
-    app.run(port=6510, host="0.0.0.0", debug=True)
+# Decorador para rutas protegidas
+def login_requerido(f):
+    @wraps(f)
+    def decorador(*args, **kwargs):
+        if "autenticado" not in session or not session["autenticado"]:
+            flash("Debes iniciar sesión para acceder a esta página.", "danger")
+            return render_template('login.html'), 401
+        return f(*args, **kwargs)
+    return decorador
+
+from routers.pelicula import *
+from routers.genero import *
+from routers.usuario import *
+
+if __name__ == '__main__':
+    app.run(port=5000, host='0.0.0.0', debug=True)

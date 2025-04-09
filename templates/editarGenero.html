@@ -1,0 +1,13 @@
+{% extends 'base.html' %} {% block content %}
+<h2>Lista de genero</h2>
+<h1>Editar Género</h1>
+
+<form method="POST">
+    <label for="nombre">Nombre del Género:</label>
+    <input type="text" name="nombre" value="{{ genero.nombre }}" required>
+    <button type="submit">Actualizar Género</button>
+</form>
+
+<br>
+<a href="{{ url_for('listGenero') }}">Volver a la lista de géneros</a>
+{% endblock %}

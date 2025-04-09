@@ -1,0 +1,59 @@
+{% extends "index.html" %}
+
+{% block menu %}
+    {% include "menu.html" %}
+{% endblock %}
+
+{% block content %}
+    <script src="../static/js/app.js"></script>
+    <div class="container mt-5"> 
+        <h3 class=" text-center  ">Editar Pelicula</h3>
+        <form id="editarPelicula" enctype="multipart/form-data" class="was-validated">
+            <h3>Editar Pelicula</h3>
+            <div class="mb-3">
+                <label class="form-label">Código:</label>
+                <input type="text" class="form-control" name="txtCodigo" id="txtCodigo" value="{{pelicula['codigo']}}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Titulo:</label>
+                <input type="text" class="form-control" name="txtTitulo" id="txtTitulo" value="{{pelicula['titulo']}}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Duración:</label>
+                <input type="text" class="form-control" name="txtDuracion" id="txtDuracion" value="{{pelicula['duracion']}}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Protagonistas:</label>
+                <input type="text" class="form-control" name="txtProtagonistas" id="txtProtagonistas" value="{{pelicula['protagonistas']}}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="cbGenero">Genero:</label>
+                <select class="form-select" name="cbGenero"  id="cbGenero"  required> {{pelicula.genero.id}}
+                    <option value="{{pelicula.genero.id}} " selected>Seleccione: </option>
+                    {% for genero in generos %}
+                        <option value="{{genero.id}}">
+                            {{genero.nombre}}
+                        </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Resumen:</label>
+                <textarea name="txtResumen" id="txtResumen" cols="30" rows="3" class="form-control"  required>{{pelicula['resumen']}}</textarea>
+            </div>
+            <div >
+                <button type="button" class="btn btn-primary" onclick="editarPelicula('{{pelicula['id']}}')">Guardar</button>
+                <a href="/peliculasVista">
+                    <button type="button" class="btn btn-danger">Cancelar</button>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script > document.getElementById('cbGenero').value = '{{pelicula.genero.id}}' </script>
+{% endblock %}
+
+{% block piePagina %}
+    {% include "piePagina.html" %}
+{% endblock %}

@@ -1,55 +1,102 @@
-from flask import request, render_template, jsonify
-from models.genero import Genero
+from flask import request, jsonify, render_template
 from app import app
+from models.genero import Genero
+from mongoengine import get_connection
+from app import login_requerido
 
-@app.route("/genero/", methods=['GET'])
-def listGenero():
+#funcion genero
+@app.route('/generos', methods=['GET'])
+def get_generos():
     try:
-        mensaje = None
-        generos = Genero.objects()
-    except Exception as error:
-        mensaje = str(error)
-        generos = []
-    return render_template('listarGenero.html', mensaje=mensaje, generos=generos)
+        generos = Genero.objects()        
+        return jsonify(generos), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
     
-@app.route("/agregarGenero/", methods=['GET', 'POST'])
-def addGenero():
+ #funcion agregar genero    
+@app.route('/generos/', methods=['POST'])
+def agregarGenero():
     try:
-        mensaje = None
-        estado = False
-        if request.method == 'POST':
-            datos = request.get_json(force=True)
-            genero = Genero(**datos)
-            genero.save()
-            estado = True
-            mensaje = "Genero Agregado correctamente"
-        else:
-            mensaje = "No permitido"
-    except Exception as error:
-        mensaje = str(error)
+        data = request.get_json(force=True)
+        genero = Genero(**data)
+        genero.save()
+        print(genero)
+        return jsonify({"message": "genero guardado"}), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
         
-    return render_template('agregarGenero.html', estado=estado, mensaje=mensaje)
-
-# Nueva ruta para editar género
-@app.route("/editarGenero/<id>", methods=['GET', 'PUT'])
-def editarGenero(id):
+#funcion Actulizar genero 
+@app.route('/generos/<id>', methods=['PUT'])
+def actualizarGenero(id):
     try:
+        data = request.get_json(force=True)
         genero = Genero.objects(id=id).first()
-        if request.method == 'PUT':
-            datos = request.get_json(force=True)
-            genero.update(**datos)
-            return jsonify({"estado": True, "mensaje": "Género actualizado correctamente"})
-        return render_template('editarGenero.html', genero=genero)
-    except Exception as error:
-        return jsonify({"estado": False, "mensaje": str(error)})
-
-# Nueva ruta para eliminar género
-@app.route("/eliminarGenero/<id>", methods=['DELETE'])
+        if genero is None:
+            return jsonify({"message": "Genero no encontrado"}), 404
+        else:
+            generoNuevo = genero.update(**data)
+            return jsonify({"message": "Genero actualizado"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+# funcion Eliminar genero 
+@app.route('/generos/<id>', methods=['DELETE'])
 def eliminarGenero(id):
     try:
         genero = Genero.objects(id=id).first()
-        genero.delete()
-        return jsonify({"estado": True, "mensaje": "Género eliminado correctamente"})
-    except Exception as error:
-        return jsonify({"estado": False, "mensaje": str(error)})
-        
+        if genero is None:
+            return jsonify({"message": "Genero no encontrado"}), 404
+        else:
+            genero.delete()
+            return jsonify({"message": "Genero eliminado"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+# vistas 
+# listar Generos
+@app.route('/generosVista', methods=['GET'])
+@login_requerido 
+def get_generos_vista():
+    try:
+        generos = Genero.objects()
+        print("genero encontrado" , generos)
+        return render_template('listarGenero.html', generos=generos), 200
+    except Exception as e:
+        return render_template('error.html', error=str(e)), 500
+    
+#  Agregar Genero 
+@app.route('/agregarGeneroVista', methods=['GET'])
+@login_requerido
+def agregar_genero_vista():
+    try:
+        return render_template('agregarGenero.html'), 200
+    except Exception as e:
+        return render_template('error.html', error=str(e)), 500
+
+#actlizar genero
+@app.route('/actualizarGeneroVista/<id>', methods=['GET'])
+@login_requerido
+def actualizar_genero_vista(id):
+    try:
+        genero = Genero.objects(id=id).first()
+        if genero is None:
+            return render_template('error.html', error="Genero no encontrado"), 404
+        else:
+            return render_template('actualizarGenero.html', genero=genero), 200
+    except Exception as e:
+        return render_template('error.html', error=str(e)), 500
+
+#eliminarGenero
+@app.route('/eliminarGenero/<id>', methods=['GET'])
+@login_requerido
+def eliminar_genero(id):
+    try:
+        genero = Genero.objects(id=id).first()
+        if genero is not  None:
+            genero.delete()
+            return render_template('listarGenero.html', generos=Genero.objects()), 200
+        else:
+            genero.delete()
+            return jsonify({"message": "genero no encontrado"}), 404
+    except Exception as e:
+        return render_template('error.html', error=str(e)), 500

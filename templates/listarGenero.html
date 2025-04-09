@@ -1,19 +1,51 @@
-{% extends 'base.html'%}
-{% block content%}
-<table class="table">
-    <thead>
-      <tr>
-        <th scope="col">codigo</th>
-        <th scope="col">titulo</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr> 
-      </tr>
-      <tr> 
-      </tr>
-      <tr> 
-      </tr>
-    </tbody>
-  </table>
-  {%endblock%}
+<!-- herdar de index -->
+{%extends "index.html"%} 
+
+{% block menu %}
+    {% include "menu.html" %}
+    <script src="../static/js/app.js"></script>
+    <script src="../static/js/eliminar.js"></script>
+
+    <div class="container mt-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="text-primary m-0"> Lista de Géneros</h2>
+          <a href="/agregarGeneroVista">
+            <button type="button" class="btn btn-success">
+              <i class="fa fa-plus me-2"></i>Agregar Género
+            </button>
+          </a>
+        </div>
+      
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover table-striped align-middle">
+            <thead class="table-primary text-center">
+              <tr>
+                <th>Nombre</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for genero in generos %}
+              <tr>
+                <td class="ps-3">{{ genero.nombre }}</td>
+                <td class="text-center">
+                  <a href="/actualizarGeneroVista/{{genero.id}}" class="btn btn-sm btn-outline-primary me-2" title="Editar">
+                    <i class="fa fa-edit"></i>
+                  </a>
+                  <button class="btn btn-sm btn-outline-danger" onclick="eliminarGenero('{{genero.id}}')" title="Eliminar">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+{% endblock %}
+
+{% block piePagina %}
+    {% include "piePagina.html" %}
+{% endblock %}

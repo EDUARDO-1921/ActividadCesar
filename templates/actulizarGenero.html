@@ -1,0 +1,28 @@
+{% extends "index.html" %}
+
+{% block menu %}
+    {% include "menu.html" %}
+{% endblock %}
+
+{% block content %}
+    <script src="../static/js/app.js"></script>
+    <div class="container mt-5"> 
+        <form id="actualizarGenero" enctype="multipart/form-data" class="was-validated">
+            <h3>Actualizar Genero</h3>
+            <div class="mb-3">
+                <label class="form-label">Nombre:</label>
+                <input type="text" class="form-control" name="txtGenero" id="txtGenero" value="{{genero['nombre']}}" required>
+            </div>
+            <div>
+                <button type="button" class="btn btn-primary" onclick="actualizarGenero('{{genero['id']}}')">Guardar</button>
+                <a href="/generosVista">
+                    <button type="button" class="btn btn-danger">Cancelar</button>
+                </a>
+            </div>
+        </form>
+    </div>
+{% endblock %} 
+
+{% block piePagina %}
+    {% include "piePagina.html" %}
+{% endblock %}

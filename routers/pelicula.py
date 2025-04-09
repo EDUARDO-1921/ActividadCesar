@@ -1,64 +1,134 @@
-from flask import request, render_template, jsonify
-from models.pelicula import Pelicula
-from models.genero import Genero
+from flask import request, jsonify, render_template
 from app import app
+from models.pelicula import Pelicula, Genero
+from app import login_requerido
 
-@app.route("/")
-def index():
-    return render_template('index.html')
+#funciones 
 
-@app.route("/pelicula/", methods=['GET'])
-def listPelicula():
+#funcion listar
+@app.route('/peliculas', methods=['GET'])
+def get_peliculas():
     try:
-        mensaje = None
         peliculas = Pelicula.objects()
-        return render_template('peliculas.html', mensaje=mensaje, peliculas=peliculas)
-    except Exception as error:
-        mensaje = str(error)
-        return render_template('peliculas.html', mensaje=mensaje, peliculas=[])
+        return jsonify(peliculas), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
     
-@app.route("/agregarPelicula/", methods=['GET', 'POST'])
-def addPelicula():
+#funcion agregar 
+@app.route('/peliculas/', methods=['POST'])
+def agregarPelicula():
     try:
-        mensaje = None
-        estado = False
-        generos = Genero.objects()
-        
-        if request.method == 'POST':
-            datos = request.get_json(force=True)
-            pelicula = Pelicula(**datos)
+        data = request.get_json(force=True)
+        print(data)
+        genero = Genero.objects(id=data["genero"]).first()
+        print(genero)
+        if genero is None:
+            return jsonify({"message": "Genero no encontrado"}), 404
+        else:
+            data["genero"] = genero # Reemplazar el id del genero por el objeto
+            pelicula = Pelicula(**data)
             pelicula.save()
-            estado = True
-            mensaje = "Pelicula agregada correctamente"
-            return jsonify({"estado": estado, "mensaje": mensaje})
-        
-        return render_template('agregarPelicula.html', estado=estado, mensaje=mensaje, generos=generos)
-    except Exception as error:
-        mensaje = str(error)
-        return jsonify({"estado": False, "mensaje": mensaje})
-
-# Nueva ruta para editar película
-@app.route("/editarPelicula/<id>", methods=['GET', 'PUT'])
-def editarPelicula(id):
+            return jsonify(pelicula), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+#funcion actulizar 
+@app.route('/peliculas/<id>', methods=['PUT'])
+def actualizarPelicula(id):
     try:
+        data = request.get_json(force=True)
         pelicula = Pelicula.objects(id=id).first()
-        generos = Genero.objects()
         
-        if request.method == 'PUT':
-            datos = request.get_json(force=True)
-            pelicula.update(**datos)
-            return jsonify({"estado": True, "mensaje": "Película actualizada correctamente"})
+        if pelicula is None:
+            return jsonify({"message": "Pelicula no encontrada"}), 404
         
-        return render_template('editarPelicula.html', pelicula=pelicula, generos=generos)
-    except Exception as error:
-        return jsonify({"estado": False, "mensaje": str(error)})
-
-# Nueva ruta para eliminar película
-@app.route("/eliminarPelicula/<id>", methods=['DELETE'])
+        if "genero" in data:
+            genero = Genero.objects(id=data["genero"]).first()# obtener el id del genero
+            if genero is None:
+                return jsonify({"message": "Genero no encontrado"}), 404
+            else:
+                data["genero"] = genero # reemplazar el id del genero por el objeto
+                pelicula.update(**data)
+                return jsonify({"message": "Pelicula actualizada"}), 200           
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+#funcion eliminar 
+@app.route('/peliculas/<id>', methods=['DELETE'])
 def eliminarPelicula(id):
     try:
         pelicula = Pelicula.objects(id=id).first()
-        pelicula.delete()
-        return jsonify({"estado": True, "mensaje": "Película eliminada correctamente"})
-    except Exception as error:
-        return jsonify({"estado": False, "mensaje": str(error)})
+        if pelicula is None:
+            return jsonify({"message": "Pelicula no encontrada"}), 404
+        else:
+            pelicula.delete()
+            return jsonify({"message": "Pelicula eliminada"}), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+#vistas 
+#listar pelicula 
+@app.route('/listarPeliculas', methods=['GET'])
+@login_requerido
+def vistaListarPeliculas():
+    try:
+        peliculas = Pelicula.objects()
+        generos = Genero.objects()
+        return render_template('listarPelicula.html', peliculas=peliculas, generos=generos), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+#agregar pelicula 
+@app.route('/agregarPelicula/', methods=['GET'])
+@login_requerido
+def vistaAgregarPelicula():
+    try:
+        generos = Genero.objects()
+        return render_template('agregarPelicula.html', generos=generos), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+#actulizar pelicula 
+@app.route('/addPelicula', methods=['POST'])
+def addPelicula():
+    try:
+        data = request.get_json(force=True)
+        genero = Genero.objects(id=data["genero"]).first()
+        if genero is None:
+            return jsonify({"message": "Genero no encontrado"}), 404
+        else:
+            data["genero"] = genero
+            print(data)
+            pelicula = Pelicula(**data) 
+            pelicula.save()
+            return jsonify({
+                "message": "Pelicula guardada",
+                "data": pelicula.to_json()  # convierte la película a JSON si es un documento de MongoEngine
+            }), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500 
+    
+#eliminar pelicula 
+@app.route('/eliminarPeliculas/<id>', methods=['GET'])
+@login_requerido
+def eliminarPeliculas(id):
+    try:
+        pelicula = Pelicula.objects(id=id).first()
+        if pelicula is not  None:
+            pelicula.delete()
+            return render_template('listarPeliculas.html', peliculas=Pelicula.objects(), generos=Genero.objects()), 200
+        else:
+            return jsonify({"message": "Pelicula no encontrada"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    
+
+@app.route('/editarPeliculas/<id>', methods=['GET'])
+@login_requerido
+def editarPeliculas(id):  
+    try:
+        pelicula = Pelicula.objects(id=id).first()
+        generos = Genero.objects()
+        return render_template('editarPeliculas.html', pelicula=pelicula, generos=generos, genero_seleccionado=pelicula.genero.id), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500

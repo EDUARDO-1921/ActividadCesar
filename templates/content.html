@@ -1,0 +1,34 @@
+{% extends "index.html" %}
+
+{% block encabezado %}
+    {% include "encabezado.html" %}
+{% endblock %}
+
+{% block menu %}
+    {% include "menu.html" %}
+{% endblock %}
+
+{% block content %}
+
+<div class="seccion-funcionamiento shadow p-4 rounded bg-light mt-4">
+    <h3 class="text-primary mb-3"> Funcionamiento de la Aplicación</h3>
+    <p class="lead">Aplicación desarrollada con <strong>Python</strong>, <strong>Flask</strong> y <strong>MongoEngine</strong>
+        Esta aplicación permite gestionar una base de datos de películas, incluyendo la creación, lectura, actualización y eliminación (CRUD) de géneros y películas. Además, cuenta con un sistema de autenticación de usuarios.
+    </p>
+ 
+
+    <h5 class="text-dark mt-4"> Funcionalidad:</h5>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">CRUD Géneros</li>
+      <li class="list-group-item"> CRUD Películas</li>
+      <li class="list-group-item"> Login de Usuario</li>
+    </ul>
+  </div>
+  
+
+{% endblock %}
+    
+{% block piePagina %}
+    {% include "piePagina.html" %}
+{% endblock %}
+    

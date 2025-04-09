@@ -1,55 +1,55 @@
-{% extends 'base.html'%}
-{%block content%}
-<h2>Agregar Pelicula</h2>
-<form>
-    <div class="form-group">
-      <label for="exampleInputEmail1">codigo</label>
-      <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="codigo">
-      <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+{% extends "index.html" %}
+
+{% block menu %}
+    {% include "menu.html" %}
+{% endblock %}
+
+{% block content %}
+    <script src="../static/js/app.js"></script>
+    <div>
+        <form enctype="multipart/form-data" class="was-validated" id="agregarPelicula">
+            <h3>Agregar Pelicula</h3>
+            <div class="mb-3">
+                <label class="form-label">Código:</label>
+                <input type="text" class="form-control" name="txtCodigo" id="txtCodigo" >
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Titulo:</label>
+                <input type="text" class="form-control" name="txtTitulo" id="txtTitulo">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Duración:</label>
+                <input type="text" class="form-control" name="txtDuracion" id="txtDuracion" >
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Protagonistas:</label>
+                <input type="text" class="form-control" name="txtProtagonistas" id="txtProtagonistas" >
+            </div>
+    
+            <div class="mb-3">
+                <label class="form-label" for="cbGenero">Genero:</label>
+                <select class="form-select" name="cbGenero"  id="cbGenero" required>
+                    <option value="" selected>Seleccione: </option>
+                    {% for genero in generos %}
+                        <option value="{{genero.id}}">{{genero.nombre}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Resumen:</label>
+                <textarea name="txtResumen" id="txtResumen" cols="30" rows="3" class="form-control" required></textarea>
+            </div>
+            <div >
+             <button type="button" class="btn btn-primary" onclick="agregarPelicula()">Guardar</button>
+             <a href="/listarPeliculas">
+                <button type="button" class="btn btn-danger">Cancelar</button>
+             </a>
+
+            </div>
+        </form>
     </div>
-    <br>
-  <br>
-    <div class="form-group">
-      <label for="exampleInputPassword1">titulo</label>
-      <input type="password" class="form-control" id="exampleInputPassword1" placeholder="titulo">
-    </div>
-    <br>
-    <br>
-    <div class="form-group">
-        <label for="exampleInputPassword1">protagonista</label>
-        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="protagonista">
-      </div>
-      <div class="form-group">
-        <br>
-  <br>
-        <label for="exampleInputPassword1">duracion</label>
-        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="duracion">
-      </div>
-      <br>
-  <br>
-      <div class="form-group">
-        <label for="exampleInputPassword1">resumen</label>
-        <input type="password" class="form-control" id="exampleInputPassword1" placeholder="resumen">
-      </div>
-      <br>
-      <br>
-<form>
-    <div class="form-group">
-      <label for="exampleFormControlFile1">insertar Foto</label>
-      <input type="file" class="form-control-file" id="exampleFormControlFile1">
-    </div>
-  </form>
-  <br>
-  <br>
-  <select class="custom-select">
-    <option selected>Genero</option>
-    <option value="1">Masculino </option>
-    <option value="2">Femenino</option>
-    <option value="3">Prefiero no decirlo</option>
-  </select>
-  
-  <br>
-  
-    <button type ="button" class="btn btn-primary ">agregar</button>
-    <button type="button" class="btn btn-danger">Cancelar</button>
-{%endblock%}
+{% endblock %}
+
+{% block piePagina %}
+    {% include "piePagina.html" %}
+{% endblock %}
